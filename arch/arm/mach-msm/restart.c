@@ -70,10 +70,12 @@ static int restart_mode;
 void *restart_reason;
 #endif
 
+#if defined(CONFIG_SEC_H_PROJECT) || defined(CONFIG_SEC_K_PROJECT)
 #ifdef CONFIG_USER_RESET_DEBUG
 #define RESET_CAUSE_LPM_REBOOT 0x95
 void *reboot_cause;
 extern int poweroff_charging;
+#endif
 #endif
 
 int pmic_reset_irq;
@@ -418,11 +420,13 @@ static void msm_restart_prepare(const char *cmd)
 	else {
 		printk(KERN_NOTICE "%s: clear reset flag\n", __func__);
 			warm_reboot_set = 1;
+#if defined(CONFIG_SEC_H_PROJECT) || defined(CONFIG_SEC_K_PROJECT)
 #ifdef CONFIG_USER_RESET_DEBUG
 		if(poweroff_charging) {
 			reboot_cause = MSM_IMEM_BASE + 0x66C;
 			__raw_writel(RESET_CAUSE_LPM_REBOOT, reboot_cause);
 		}
+#endif
 #endif
 		__raw_writel(0x12345678, restart_reason);
 	}

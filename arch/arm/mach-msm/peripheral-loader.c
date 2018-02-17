@@ -52,7 +52,9 @@
 #include <asm/io.h>
 #endif 
 
+#if defined(CONFIG_SEC_H_PROJECT) || defined(CONFIG_SEC_K_PROJECT)
 extern int poweroff_charging;
+#endif
 
 #define pil_err(desc, fmt, ...)						\
 	dev_err(desc->dev, "%s: " fmt, desc->name, ##__VA_ARGS__)
@@ -646,10 +648,14 @@ int pil_boot(struct pil_desc *desc)
 
 	down_read(&pil_pm_rwsem);
 	snprintf(fw_name, sizeof(fw_name), "%s.mdt", desc->name);
+#if defined(CONFIG_SEC_H_PROJECT) || defined(CONFIG_SEC_K_PROJECT)
 	if ( poweroff_charging && strcmp("mba.mdt",fw_name)==0)   /* skip locating mba.mdt during poweroff charging */
 		ret = -2; 
 	else	
 		ret = request_firmware(&fw, fw_name, desc->dev);
+#else
+	ret = request_firmware(&fw, fw_name, desc->dev);
+#endif
 	if (ret) {
 		pil_err(desc, "Failed to locate %s\n", fw_name);
 		goto out;
